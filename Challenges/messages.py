@@ -51,7 +51,28 @@
 # 			Output:
 			    
 # 			2,3
-			
+
+testL = [4,3,10,2,8]
+testT = 12
+
 def solution(l, t):
+    sJ = -1
+    sI = -1
+
+    j = 0
+
+    for i in range(len(l)+1):
+        print(l[j:i])
+        print(sum(l[j:i]))
+        if sum(l[j:i]) == t:
+            print('hit')
+            sJ = j
+            sI = i
+        if sum(l[j:i]) > t:
+            j = j+1
+            i = i-1
+    
     # Your code here
-    return 0
+    return sJ,sI
+
+print(solution(testL, testT))
