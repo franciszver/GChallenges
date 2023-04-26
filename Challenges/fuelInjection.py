@@ -1,6 +1,3 @@
-testInt = '3'
-expected = 1
-
 def solution(n):
     n = int(n)
     previous = 1
@@ -8,36 +5,19 @@ def solution(n):
     steps = 0
     forwards = 0
     backwards = 0
-    if n <= 2:
+    if n == 1:
+        print('1st attempt')
         return steps
-    for i in range(n):
-        if total == n:
-            return steps
-        if total > n:
-            #check subtract
-            backwards = 0
-            for j in range(total*2):
-                if total-j > n:
-                    backwards = backwards + 1
-                else:
-                    break
-            #check add
-            forwards = 0
-            for k in range(total*2):
-                if previous+k < n:
-                    forwards = forwards + 1
-                else:
-                    break
-            if forwards == backwards:
-                steps = steps + forwards-1
-            if forwards < backwards:
-                steps = steps + forwards-1
-            if forwards > backwards:
-                steps = steps + backwards
-            return steps
-        previous = total
-        total = total * 2
-        steps = steps + 1
-    return steps
+    while n >= 1:
+        if n%2 == 0:
+            steps = steps + 1
+            n = n/2
+        if n%2 != 0:
+            steps = steps+1
+            n = n-1
+    print('2nd attempt')
+    return steps-1
 
-print(solution(testInt))
+
+for i in range(100):
+    print(solution(i), i)
