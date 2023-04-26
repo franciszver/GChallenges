@@ -10,6 +10,9 @@ def solution(n):
             n = n/2
         else:
             #test up and down
+            if ((n-1)/2) == 1:
+                steps = steps + 1
+                n = n-1
             if ((n-1)/2)%2 == 0:
                 steps = steps + 1
                 n = n-1
