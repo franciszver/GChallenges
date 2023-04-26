@@ -65,13 +65,14 @@ def solution(l, t):
         if sum(tempArr) == t:
             sJ = j
             sI = i-1
+            return sJ,sI
         if sum(tempArr) > t:
             for ji in range(len(tempArr)+1):
                 tempArr2 = tempArr[ji:]
                 if sum(tempArr2) == t:
                     sJ = j+ji
                     sI = i-1
+                    return sJ,sI
             j=i-1
     return sJ,sI
-
 print(solution(testL, testT))
