@@ -52,8 +52,8 @@
 			    
 # 			2,3
 
-testL = [4,3,10,2,8]
-testT = 13
+testL = [4,3,10,2,8,5,7,1,14]
+testT = 22
 
 def solution(l, t):
     sJ = -1
@@ -69,10 +69,11 @@ def solution(l, t):
         if sum(tempArr) > t:
             for ji in range(len(tempArr)+1):
                 tempArr2 = tempArr[ji:]
+                print('overage', tempArr2)
                 if sum(tempArr2) == t:
                     sJ = j+ji
                     sI = i-1
                     return sJ,sI
-            j=i-1
+            j = i-2
     return sJ,sI
 print(solution(testL, testT))
