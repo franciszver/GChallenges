@@ -13,6 +13,7 @@ ta = [0, 3, 2, 9, 14]
 # t = [[0, 2, 1, 0, 0], [0, 0, 0, 3, 4], [0, 0, 0, 0, 0], [0, 0, 0, 0,0], [0, 0, 0, 0, 0]]
 
 from fractions import Fraction
+from fractions import gcd
 
 def rqCalc(m, absorbingStates, nonAbsorbingStates):
   r = []
@@ -38,7 +39,38 @@ def subtractIQ(q):
         q[r][each] = -q[r][each]
   return q
 
+def getDeterminant(q): #assuming q is a square matrix
+  #quick returns
+  if len(q) == 1:
+    return q[0][0]
+  if len(q) == 2:
+    return q[0][0]*q[1][1] - q[0][1] * q[1][0]
 
+  determinant = 0
+  for firstRofEach in range(len(q[0])):
+    subMatrix = getSubMatrix(q, 0, firstRofEach)
+    determinant += (((-1)**firstRofEach)*q[0][firstRofEach] * getDeterminant(subMatrix))
+  
+  return determinant
+
+def getConvertedSqMatrix(q):
+  for i in range(len(q)):
+    for j in range(i, len(q), 1):
+      q[i][j], q[j][i] = q[j][i], q[i][j]
+  return q
+
+def productMatrix(a, b):
+  result = []
+  temp = len(a)
+  for r in range(len(a)):
+    tempArray = []
+    for col in range(len(b[0])):
+      product = 0
+      for sel in range(temp):
+        product += (a[r][sel]*b[sel][col])
+      tempArray.append(product)
+    result.append(tempArray)
+  return result
 
 def applyProbability(m):
   for r in range(len(m)):
@@ -49,6 +81,45 @@ def applyProbability(m):
       for each in range(len(m[r])):
         m[r][each] /= float(total)
   return m
+
+def getSubMatrix(q, i, j):
+  subMatrix = []
+  for r in q[:i] + q[i+1:]:
+    temp = []
+    for each in r[:j] + r[j+1:]:
+      temp.append(each)
+    subMatrix.append(temp)
+  return subMatrix
+
+def getInverse(q):
+  q1 = []
+  for r in range(len(q)):
+    temp = []
+    for col in range(len(q[r])):
+      subMatrix = getSubMatrix(q, r, col)
+      determinant = getDeterminant(subMatrix)
+      temp.append(((-1)**(r+col))*determinant)
+    q1.append(temp)
+  mainDeterminant = getDeterminant(q)
+  q1 = getConvertedSqMatrix(q1)
+
+
+def cleanup(m):
+  # Basically convert the fractions into a/b form so that the denominator can be determined and reported on
+  s0 = m[0]
+  toFraction = [Fraction(i).limit_denominator() for i in s0]
+  lcm = 1
+  for i in toFraction:
+    if i.denominator != 1:
+      lcm = i.denominator
+  for i in toFraction:
+    if i.denominator != 1:
+      lcm = lcm*i.denominator/gcd(lcm, i.denominator)
+  toFraction = [(i*lcm).numerator for i in toFraction]
+  toFraction.append(lcm)
+  for each in range(len(toFraction)):
+    toFraction[each] = int(toFraction[each])
+  return toFraction
 
 def solution(m):
   n = len(m)
