@@ -11,7 +11,8 @@ from fractions import gcd
 
 # t = [[0, 1, 0, 0, 0, 1], [4, 0, 0, 3, 2, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
 # t = [[0, 2, 1, 0, 0], [0, 0, 0, 3, 4], [0, 0, 0, 0, 0], [0, 0, 0, 0,0], [0, 0, 0, 0, 0]]
-t = [0]
+# t = [[0]]
+t = [[]]
 
 def initializeAnswerArray(m):
     terminalIndexes = []
@@ -52,12 +53,14 @@ def LCMofArray(a):
   return lcm
 
 def solution(m):
-    if len(m) == 1:
-        if len(m[0]) == 1 and m[0][0] == 0:
-            return [1, 1]
-    
     #Get an array of terminals (if sum == 0, insert 1, if sum>0 insert 0)
     #Example return arrayOfTerminals = [[0], [0], [1], [1], [1], [1]]
+    
+    # special case where m is only 1
+    if len(m) == 1:
+        if len(m[0]) == 1 and (m[0][0]) == 0:
+            return [1, 1]
+
     keepGoing = 1
     arrayOfTerminals = (initializeAnswerArray(m))
     while keepGoing > 0:
@@ -87,4 +90,5 @@ def solution(m):
     answer.append(finalSum)
 
     return answer
+
 print(solution(t))
