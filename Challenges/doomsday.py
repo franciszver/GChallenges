@@ -12,7 +12,7 @@ def initializeAnswerArray(m):
     terminalIndexes = []
     for i in range(len(m)):
         if sum(list(m[i])) == 0:
-            terminalIndexes.append([i, 1]) #Using -1 to indicate start of calculation
+            terminalIndexes.append([i, '']) #Using 0 to indicate start of calculation, and if remines 0, not valid termination path
         else:
             terminalIndexes.append([0, -1]) #Using -1 to indicate non-terminating position
     return terminalIndexes
@@ -23,28 +23,31 @@ def clean(m, targetArray):
             #searchMarrayForReferenceToThatTarget, store position and multiply probability
             for mTemp in range(len(m)):
                 mTempArray = m[mTemp]
-                if mTempArray[each] > 0:
-                    print(mTempArray)
+                if mTempArray[targetArray[each][0]] > 0:
                     total = sum(list(mTempArray))
-                    print(total)
-                    print(mTempArray[each])
-                    probability = str(mTempArray[each]) + '/' + str(total)
-                    print(probability)
+                    probability = str(mTempArray[targetArray[each][0]]) + '/' + str(total)
                     targetArray[each][0] = mTemp
-                    targetArray[each][1] = probability
-                    print(targetArray[each])
+                    targetArray[each][1] = str(targetArray[each][1]) + '.' + probability
                     break
     return targetArray
+
+def checkIfDone(targetArray):
+    for each in targetArray:
+        if each[0] > 0:
+            if len(each[1])>1:
+                return 1
+    return 0
 
 def solution(m):
     #Get an array of terminals (if sum == 0, insert 1, if sum>0 insert 0)
     #Example return arrayOfTerminals = [[0], [0], [1], [1], [1], [1]]
+    keepGoing = 1
     arrayOfTerminals = (initializeAnswerArray(m))
-    print(arrayOfTerminals)
-    arrayOfTerminals = clean(m, arrayOfTerminals)
+    while keepGoing > 0:
+        arrayOfTerminals = clean(m, arrayOfTerminals)
+        keepGoing = checkIfDone(arrayOfTerminals)
     #for each entry, search M for references, and append the ratio in the position of array
     # arrayOfTerminals = appendProbabilities(m, arrayOfTerminals)
-    
     return arrayOfTerminals
 
 
