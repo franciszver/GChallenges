@@ -5,6 +5,7 @@
 #IF passes check, simplifiy with same denominator
 #steal numerators
 #format reply, with numerators and TotalDenominator
+from fractions import Fraction
 
 t = [[0, 1, 0, 0, 0, 1], [4, 0, 0, 3, 2, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
 
@@ -12,9 +13,9 @@ def initializeAnswerArray(m):
     terminalIndexes = []
     for i in range(len(m)):
         if sum(list(m[i])) == 0:
-            terminalIndexes.append([i, '']) #Using 0 to indicate start of calculation, and if remines 0, not valid termination path
+            terminalIndexes.append([i, ['']]) #Using 0 to indicate start of calculation, and if remines 0, not valid termination path
         else:
-            terminalIndexes.append([0, -1]) #Using -1 to indicate non-terminating position
+            terminalIndexes.append([0, [-1]]) #Using -1 to indicate non-terminating position
     return terminalIndexes
 
 def clean(m, targetArray):
@@ -26,8 +27,9 @@ def clean(m, targetArray):
                 if mTempArray[targetArray[each][0]] > 0:
                     total = sum(list(mTempArray))
                     probability = str(mTempArray[targetArray[each][0]]) + '/' + str(total)
+                    probabilityFraction = Fraction(probability)
                     targetArray[each][0] = mTemp
-                    targetArray[each][1] = str(targetArray[each][1]) + '.' + probability
+                    targetArray[each][1].append(probabilityFraction)
                     break
     return targetArray
 
@@ -48,7 +50,21 @@ def solution(m):
         keepGoing = checkIfDone(arrayOfTerminals)
     #for each entry, search M for references, and append the ratio in the position of array
     # arrayOfTerminals = appendProbabilities(m, arrayOfTerminals)
-    return arrayOfTerminals
+    answer = []
+    for cleanUpAnswer in arrayOfTerminals:
+        if cleanUpAnswer[1][0] != -1:
+            if cleanUpAnswer[1][0] == '':
+                if len(cleanUpAnswer[1]) == 1:
+                    answer.append(0)
+                else:
+                    #calculateTotalProbability
+                    total = Fraction(1,1)
+                    for fractions in cleanUpAnswer[1]:
+                        print('fractions', fractions)
+                        if fractions != '':
+                            total = total*fractions
+                    answer.append(total)
+    return answer
 
 
 print(solution(t))
