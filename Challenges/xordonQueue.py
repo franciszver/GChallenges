@@ -14,6 +14,8 @@ expected = 2
 # keep going until working size is 1
 # then put out the xor number
 
+# currently passes 1,2,3,7,8,10
+
 
 def solution(start, length):
     if length == 1:
