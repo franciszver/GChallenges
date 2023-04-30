@@ -102,7 +102,10 @@ def getInverse(q):
     q1.append(temp)
   mainDeterminant = getDeterminant(q)
   q1 = getConvertedSqMatrix(q1)
-
+  for i in range(len(q)):
+    for j in range(len(q[i])):
+      q1[i][j] /= float(mainDeterminant)
+  return q1
 
 def cleanup(m):
   # Basically convert the fractions into a/b form so that the denominator can be determined and reported on
