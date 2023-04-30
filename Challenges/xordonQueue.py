@@ -6,9 +6,9 @@ start = 0
 size = 3
 expected = 2
 
-start3 = 1
+start3 = 2
 size3 = 1
-expected3 = 1^1
+expected3 = 2
 
 # summary of problem is this pattern
 # start with first number, xor those numbers until reach size difference
@@ -19,6 +19,8 @@ expected3 = 1^1
 # then put out the xor number
 
 # currently passes 1,2,3,4,7,8,10
+# current assumption is that execution time is limited
+
 
 
 def solution(start, length):
