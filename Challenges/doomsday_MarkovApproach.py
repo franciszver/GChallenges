@@ -11,87 +11,144 @@
 from fractions import Fraction
 from fractions import gcd
 
-
-# t = [[0, 1, 0, 0, 0, 1], [4, 0, 0, 3, 2, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+t = [[0, 1, 0, 0, 0, 1], [4, 0, 0, 3, 2, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+ta = [0, 3, 2, 9, 14]
 # t = [[0, 2, 1, 0, 0], [0, 0, 0, 3, 4], [0, 0, 0, 0, 0], [0, 0, 0, 0,0], [0, 0, 0, 0, 0]]
-# t = [[0]]
-t = [[]]
 
-def initializeAnswerArray(m):
-    terminalIndexes = []
-    for i in range(len(m)):
-        if sum(list(m[i])) == 0:
-            terminalIndexes.append([i, ['']]) #Using 0 to indicate start of calculation, and if remines 0, not valid termination path
-        else:
-            terminalIndexes.append([0, [-1]]) #Using -1 to indicate non-terminating position
-    return terminalIndexes
+def lcm(a, b,):
+  return a * b // gcd(a,b)
 
-def clean(m, targetArray):
-    for each in range(len(targetArray)):
-        if targetArray[each][0] != 0:
-            #searchMarrayForReferenceToThatTarget, store position and multiply probability
-            for mTemp in range(len(m)):
-                mTempArray = m[mTemp]
-                if mTempArray[targetArray[each][0]] > 0:
-                    total = sum(list(mTempArray))
-                    probability = str(mTempArray[targetArray[each][0]]) + '/' + str(total)
-                    probabilityFraction = Fraction(probability)
-                    targetArray[each][0] = mTemp
-                    targetArray[each][1].append(probabilityFraction)
-                    break
-    return targetArray
+def findDenominator(a):
+  aLen = len(a)
+  if aLen <= 2:
+    return lcm(*a)
+  init = lcm(a[0], a[1])
+  i = 2
+  while i < aLen:
+    init = lcm(init, a[i])
+    i+=1
+  return init
 
-def checkIfDone(targetArray):
-    for each in targetArray:
-        if each[0] > 0:
-            if len(each[1])>1:
-                return 1
-    return 0
+def convert(m):
+  for j in range(len(m)):
+    rowTotal = sum(m[j])
+    if rowTotal == 0: # identify an absorbing state
+      m[j][j] = 1 # add the one to indicate the identity matrix
+    else:
+      for k in range(len(m)):
+        m[j][k] = Fraction(m[j][k], rowTotal) # adds probabilities
 
-#blatantly copied lcm code
-def LCMofArray(a):
-  lcm = a[0]
-  for i in range(1,len(a)):
-    lcm = lcm*a[i]//gcd(lcm, a[i])
-  return lcm
+def subMatrix(matrix, rows, cols):
+  tempMatrix = []
+  for r in rows:
+    currRow = []
+    for c in cols:
+      currRow.append(matrix[r][c])
+    tempMatrix.append(currRow)
+  return tempMatrix
+
+def getQ(matrix, nonAbsorbingStates):
+  return subMatrix(matrix, nonAbsorbingStates, nonAbsorbingStates)
+
+def getR(matrix, nonAbsorbingStates, absorbingStates):
+  return subMatrix(matrix, nonAbsorbingStates, absorbingStates)
+
+def make2dList(n, m):
+  a = []
+  for r in range(n):
+    a+=[[0]*m]
+  return a
+
+def makeIdentity(n):
+  tempMatrix = make2dList(n,n)
+  for j in range(n):
+    tempMatrix[j][j] = 1
+  return tempMatrix
+
+def subtractMatrices(a, b):
+  tempMatrix = []
+  n, m = len(a), len(b)
+  for j in range(n):
+    r = []
+    for k in range(m):
+      r.append(a[j][k] - b[j][k])
+    tempMatrix.append(r)
+  return tempMatrix
+
+def multiplyMatrices(a, b):
+  ar, ac, bc = len(a), len(a[0]), len(b[0])
+  c = make2dList(ar, bc)
+  for j in range(ar):
+    for k in range(bc):
+      prod = Fraction(0,1)
+      for l in range(ac):
+        prod += a[j][l] * b[l][k]
+      c[j][k] = prod
+  return c
+
+def addMultipleOfRowOfSqMatrix(matrix, sourceRow, k, targetRow):
+  n = len(matrix)
+  rowOp = makeIdentity(n)
+  rowOp[targetRow][sourceRow] = k
+  return multiplyMatrices(rowOp, matrix)
+
+def multiplyRowOfSqMatrix(matrix, row, k):
+  n = len(matrix)
+  identity = makeIdentity(n)
+  identity[row][row] = k
+  return multiplyMatrices(identity, matrix)
+
+def invertMatrix(matrix):
+  n = len(matrix)
+  inverse = makeIdentity(n)
+  for col in range(n):
+    diagonalRow = col
+    k = Fraction(1, matrix[diagonalRow][col])
+    matrix = multiplyRowOfSqMatrix(matrix, diagonalRow, k)
+    inverse = multiplyRowOfSqMatrix(inverse, diagonalRow, k)
+    sourceRow = diagonalRow
+    for targetRow in range(n):
+      if sourceRow != targetRow:
+        k=-matrix[targetRow][col]
+        matrix = addMultipleOfRowOfSqMatrix(matrix, sourceRow, k, targetRow)
+        inverse = addMultipleOfRowOfSqMatrix(inverse, sourceRow, k, targetRow)
+    return inverse
 
 def solution(m):
-    #Get an array of terminals (if sum == 0, insert 1, if sum>0 insert 0)
-    #Example return arrayOfTerminals = [[0], [0], [1], [1], [1], [1]]
-    
-    # special case where m is only 1
-    if len(m) == 1:
-        if len(m[0]) == 1 and (m[0][0]) == 0:
-            return [1, 1]
+  nonAbsorbingStates = []
+  absorbingStates = []
 
-    keepGoing = 1
-    arrayOfTerminals = (initializeAnswerArray(m))
-    while keepGoing > 0:
-        arrayOfTerminals = clean(m, arrayOfTerminals)
-        keepGoing = checkIfDone(arrayOfTerminals)
-    #for each entry, search M for references, and append the ratio in the position of array
-    # arrayOfTerminals = appendProbabilities(m, arrayOfTerminals)
-    answer = []
-    denominators = []
-    for cleanUpAnswer in arrayOfTerminals:
-        if cleanUpAnswer[1][0] != -1:
-            if cleanUpAnswer[1][0] == '':
-                if len(cleanUpAnswer[1]) == 1:
-                    answer.append(0)
-                else:
-                    #calculateTotalProbability
-                    total = Fraction(1,1)
-                    for fractions in cleanUpAnswer[1]:
-                        if fractions != '':
-                            total = total*fractions
-                    denominators.append(total.denominator)
-                    answer.append(total)
-    commonDenominator = LCMofArray(denominators)
-    for a in range(len(answer)):
-        answer[a] = (answer[a]*commonDenominator).numerator
-    finalSum = sum(answer)
-    answer.append(finalSum)
+  #First discover which states are absorbing and which are not
+  for each in range(len(m)):
+     if sum(m[each]) == 0:
+        absorbingStates.append(each)
+     else:
+        nonAbsorbingStates.append(each)
 
-    return answer
+  #Convert m to probabilities and provide the corresponding identity matrix
+  convert(m)
+
+  #Get q needed for the Markov calculations F = (I - Q)^-1
+  q = getQ(m, nonAbsorbingStates)
+  
+  #Get r needed for the Markov calculations
+  r = getR(m, nonAbsorbingStates, absorbingStates)
+
+  # Make an identity matrix for use with the I section
+  identity = makeIdentity(len(q))
+
+  # (I - Q)
+  diff = subtractMatrices(identity, q)
+
+  # diff^-1
+  inverse = invertMatrix(diff)
+
+  result = multiplyMatrices(inverse, r)
+
+  denominator = findDenominator([each.denominator for each in result[0]])
+  result = [each.numerator * denominator // each.denominator for each in result[0]] # we just want the first of result because it's S0
+  result.append(denominator)
+
+  return result
 
 print(solution(t))
