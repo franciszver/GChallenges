@@ -21,16 +21,14 @@ def solution(start, length):
     
     answer = start
     prevStart = start
-    currNum = start
+    currNum = start+1
     iterations = 0
     totalIterations = length
-    workingSize = length
+    workingSize = length-1
     # keep going until working size is 0
     while totalIterations > 0:
         #start XORing until
-        usedArray = []
         while workingSize > 0:
-            usedArray.append(currNum)
             answer = answer^currNum
             currNum += 1
             workingSize -= 1
@@ -40,11 +38,8 @@ def solution(start, length):
         iterations += 1
         prevStart = start+(iterations*length)
         currNum = prevStart
-        print('usedArray', usedArray)
-    
     return answer
 
 
 print(solution(start, size))
 print(solution(start2, size2))
-print(17^18^19^20^21^22^23^25^26^29)
