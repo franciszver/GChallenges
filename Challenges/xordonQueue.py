@@ -6,6 +6,10 @@ start = 0
 size = 3
 expected = 2
 
+start3 = 1
+size3 = 1
+expected3 = 1^1
+
 # summary of problem is this pattern
 # start with first number, xor those numbers until reach size difference
 # skip to next start number, which is previousstart+iterationcount*startsize
@@ -14,13 +18,10 @@ expected = 2
 # keep going until working size is 1
 # then put out the xor number
 
-# currently passes 1,2,3,7,8,10
+# currently passes 1,2,3,4,7,8,10
 
 
 def solution(start, length):
-    if length == 1:
-        return start^(start+1)
-    
     answer = start
     prevStart = start
     currNum = start+1
@@ -45,3 +46,4 @@ def solution(start, length):
 
 print(solution(start, size))
 print(solution(start2, size2))
+print(solution(start3, size3), expected3)
