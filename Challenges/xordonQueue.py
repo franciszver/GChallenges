@@ -1,10 +1,10 @@
-start = 17
-size = 4
-expected = 14
+start2 = 17
+size2 = 4
+expected2 = 14
 
-start2 = 0
-size2 = 3
-expected2 = 2
+start = 0
+size = 3
+expected = 2
 
 # summary of problem is this pattern
 # start with first number, xor those numbers until reach size difference
@@ -16,9 +16,31 @@ expected2 = 2
 
 
 def solution(start, length):
+    answer = start
+    prevStart = start
+    currNum = start
+    iterations = 0
+    totalIterations = length
+    workingSize = length
+    # keep going until working size is 0
+    while totalIterations > 0:
+        #start XORing until
+        currNum = prevStart
+        usedArray = []
+        while workingSize > 0:
+            usedArray.append(currNum)
+            answer = answer^currNum
+            currNum += 1
+            workingSize -= 1
+        totalIterations -= 1
+        #prep next workload size
+        workingSize = totalIterations
+        iterations += 1
+        prevStart = start+(iterations*length)
+        print('usedArray', usedArray)
     
-    return 0^1^2^3^4^6
+    return answer
 
 
-print(solution(start, size), expected)
-print(solution(start2, size2), expected2)
+print(solution(start, size))
+print(solution(start2, size2))
