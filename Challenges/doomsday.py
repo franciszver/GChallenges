@@ -6,6 +6,8 @@
 #steal numerators
 #format reply, with numerators and TotalDenominator
 from fractions import Fraction
+from fractions import gcd
+
 
 t = [[0, 1, 0, 0, 0, 1], [4, 0, 0, 3, 2, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
 
@@ -40,6 +42,13 @@ def checkIfDone(targetArray):
                 return 1
     return 0
 
+#blatantly copied lcm code
+def LCMofArray(a):
+  lcm = a[0]
+  for i in range(1,len(a)):
+    lcm = lcm*a[i]//gcd(lcm, a[i])
+  return lcm
+
 def solution(m):
     #Get an array of terminals (if sum == 0, insert 1, if sum>0 insert 0)
     #Example return arrayOfTerminals = [[0], [0], [1], [1], [1], [1]]
@@ -51,6 +60,7 @@ def solution(m):
     #for each entry, search M for references, and append the ratio in the position of array
     # arrayOfTerminals = appendProbabilities(m, arrayOfTerminals)
     answer = []
+    denominators = []
     for cleanUpAnswer in arrayOfTerminals:
         if cleanUpAnswer[1][0] != -1:
             if cleanUpAnswer[1][0] == '':
@@ -60,11 +70,15 @@ def solution(m):
                     #calculateTotalProbability
                     total = Fraction(1,1)
                     for fractions in cleanUpAnswer[1]:
-                        print('fractions', fractions)
                         if fractions != '':
                             total = total*fractions
+                    denominators.append(total.denominator)
                     answer.append(total)
+    commonDenominator = LCMofArray(denominators)
+    for a in range(len(answer)):
+        answer[a] = (answer[a]*commonDenominator).numerator
+    finalSum = sum(answer)
+    answer.append(finalSum)
+
     return answer
-
-
 print(solution(t))
