@@ -5,6 +5,8 @@
 #IF passes check, simplifiy with same denominator
 #steal numerators
 #format reply, with numerators and TotalDenominator
+#note to myself: Watch patrickJMT's series on Markov Chains ep7-9
+
 from fractions import Fraction
 from fractions import gcd
 
