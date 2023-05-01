@@ -5,7 +5,7 @@ start = 0
 size = 3
 
 start3 = 0
-size3 = 42
+size3 = 100
 
 # summary of problem is this pattern
 # start with first number, xor those numbers until reach size difference
@@ -19,7 +19,8 @@ size3 = 42
 # Update 2:
 # idea is the efficiency of the logic fails with too many high iterations
 # however, a quick internet search reveals that there's a pattern to iterative XOR operations at the binary level
-# 
+# if we can get the range between beginning and end... then we can determine if it's a 0 loop
+
 
 
 def f(a):
@@ -30,15 +31,18 @@ def getXor(a, b):
     return f(b)^f(a-1)
 
 def gen_nums(start, length):
+    totalSteps = 0
     l = length
     ans = 0
     while l > 0:
         l = l-1
         ans^=getXor(start, start+l)
         start += length
-    return ans
+        totalSteps+=1
+    return ans, totalSteps
 
 def solution(start, length):
+    totalSteps = 0
     if length == 1:
         return start^(start+1)
     
@@ -50,29 +54,26 @@ def solution(start, length):
     workingSize = length-1
     # keep going until working size is 0
     while totalIterations > 0:
-        #start XORing until
-        while workingSize > 0:
-            answer = answer^currNum
-            currNum += 1
-            workingSize -= 1
-        totalIterations -= 1
-        #efficiency step
-        checkForReduce = 1
-        while checkForReduce > 0:
-            if totalIterations%8 == 0 and totalIterations > 16:
-                totalIterations = totalIterations/8
-            else:
-                checkForReduce = 0
-                
+        totalSteps += 1
+        if totalIterations%4 == 0 and (answer%4 == 0 or answer%4 == 2) and prevStart%4 == 0: #determined through testing that answer will be the same
+            answer = answer
+        else:
+            #start XORing until workingSize done
+            while workingSize > 0:
+                totalSteps += 1
+                answer = answer^currNum
+                currNum += 1
+                workingSize -= 1
+        
         #prep next workload size
+        totalIterations -= 1
         workingSize = totalIterations
         iterations += 1
         prevStart = start+(iterations*length)
         currNum = prevStart
-        # print('{0:08b}'.format(totalIterations), totalIterations, answer)
-    return answer, gen_nums(start,length)
+    return answer, totalSteps, gen_nums(start,length)
 
 
-print(solution(start, size))
-print(solution(start2, size2))
+# print(solution(start, size))
+# print(solution(start2, size2))
 print(solution(start3, size3))
