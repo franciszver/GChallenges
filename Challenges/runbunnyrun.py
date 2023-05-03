@@ -14,11 +14,68 @@
 
 
 
+from itertools import permutations
+
+######### BEGINNING BELLMANFORD IMPLEMENTATION ##########
+## This is slightly different than normal bellman ford because this approach
+## hits all the vertex
+
+def findDistance(graph, source):
+    n = len(graph)
+    distance = [float('inf')] * len(graph) #the assumption is infinite based on start
+    # now initialize the source
+    distance[source] = 0
+
+    # continue bellman ford and iterate throught the vertices
+    for i in range(n):
+        for j in range(n):
+            for k in range(n):
+                weight = graph[j][k]
+                # now verify the first condition
+                # and if a path is found that's more efficient, then update the distance
+                if distance[j] + weight < distance[k]:
+                    distance[k] = distance[j] + weight
+    return distance
+
+
+def calcBellmanFord(graph):
+    distances = []
+    for vert in range(len(graph)):
+        distances.append(findDistance(graph, vert))
+    return distances
+######### END OF BELLMANFORD IMPLEMENTATION########
+
+def hasLoop(graph):
+    distance = graph[0]
+    n = len(graph)
+    for j in range(n):
+            for k in range(n):
+                weight = graph[j][k]
+                if distance[j] + weight < distance[k]:
+                    # then a loop has been found
+                    return True
+    return False
+
+def getStepsAndTime(bunnies, graph):
+    # total time can be started with the first path found
+    # bunnies[0] transition bunny at the start
+    totalTime = graph[0][bunnies[0]]
+    # now add the time to get to the bulkhead
+    # bunnies[-1] transition bunny right before bulkhead
+    totalTime += graph[bunnies[-1]][len(graph)-1]
+    for i in range(1, len(bunnies)):
+        # starting bunny
+        u = bunnies[i-1]
+        # ending bunny
+        v = bunnies[i]
+        # now add the total time from 'u' bunny to 'v' bunny
+        totalTime += graph[u][v]
+    return totalTime
 
 def solution(times, times_limit):
     # solution requires bunnies so first get the number of bunnies
     total_bunnies = len(times) - 2
-    bunnies = [x for x in range(1, total_bunnies)+1]
+    bunnies = [x for x in range(1, total_bunnies)]
     
     # as stated in upper comments, bellmanford is designed to return distances from each node back to origin and edges, so we can determine optimum paths
     distances = calcBellmanFord(times)
@@ -26,3 +83,15 @@ def solution(times, times_limit):
     # logic quick, if you find a loop, then you can build infinite time and rescue all bunnies, so return the range of all bunnies
     if hasLoop(distances):
       return range(total_bunnies)
+    
+    # now iterate through permutations, so that you can find the best path with as many bunnies as possible saved
+    for i in range(total_bunnies, 0, -1):
+        # using permutations, it'll automatically calculate and try the different iterations in the combination of total bunny indexes in 'bunnies' + to the index indicated in the range of (total_bunnies)
+        for eachPerm in permutations(bunnies, i):
+            # now calculate the total time based on the steps
+            totalTime = getStepsAndTime(eachPerm, distances)
+            if totalTime <= times_limit:
+                return [x-1 for x in sorted(eachPerm)]
+    
+    # just in case nothing is possible
+    return []
