@@ -8,9 +8,13 @@
 
 
 
-# solution.solution([[0, 1, 1, 1, 1], [1, 0, 1, 1, 1], [1, 1, 0, 1, 1], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0]], 3)Output:    [0, 1]
+t = [[0, 1, 1, 1, 1], [1, 0, 1, 1, 1], [1, 1, 0, 1, 1], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0]]
+t2 = 3
+# Output:    [0, 1]
 
-# solution.solution([[0, 2, 2, 2, -1], [9, 0, 2, 2, -1], [9, 3, 0, 2, -1], [9, 3, 2, 0, -1], [9, 3, 2, 2, 0]], 1)Output:    [1, 2]
+r = [[0, 2, 2, 2, -1], [9, 0, 2, 2, -1], [9, 3, 0, 2, -1], [9, 3, 2, 0, -1], [9, 3, 2, 2, 0]] 
+r2 = 1
+# Output:    [1, 2]
 
 
 
@@ -22,7 +26,7 @@ from itertools import permutations
 
 def findDistance(graph, source):
     n = len(graph)
-    distance = [float('inf')] * len(graph) #the assumption is infinite based on start
+    distance = [float('inf')] * n #the assumption is infinite based on start
     # now initialize the source
     distance[source] = 0
 
@@ -59,7 +63,8 @@ def hasLoop(graph):
 def getStepsAndTime(bunnies, graph):
     # total time can be started with the first path found
     # bunnies[0] transition bunny at the start
-    totalTime = graph[0][bunnies[0]]
+    totalTime = 0
+    totalTime += graph[0][bunnies[0]]
     # now add the time to get to the bulkhead
     # bunnies[-1] transition bunny right before bulkhead
     totalTime += graph[bunnies[-1]][len(graph)-1]
@@ -95,3 +100,6 @@ def solution(times, times_limit):
     
     # just in case nothing is possible
     return []
+
+print(solution(t, t2))
+print(solution(r, r2))
