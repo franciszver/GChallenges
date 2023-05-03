@@ -80,7 +80,7 @@ def getStepsAndTime(bunnies, graph):
 def solution(times, times_limit):
     # solution requires bunnies so first get the number of bunnies
     total_bunnies = len(times) - 2
-    bunnies = [x for x in range(1, total_bunnies)]
+    bunnies = [x for x in range(1, total_bunnies+1)]
     
     # as stated in upper comments, bellmanford is designed to return distances from each node back to origin and edges, so we can determine optimum paths
     distances = calcBellmanFord(times)
