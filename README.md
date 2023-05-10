@@ -1,2 +1,2 @@
-# GoogleFoobar
-This is my repository for the GoogleFoobar Challenge
+# Google Challenge (F-bar)
+This is my repository for the Google Challenge (F-bar)
