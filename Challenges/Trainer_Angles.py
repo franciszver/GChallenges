@@ -2,15 +2,16 @@
 # Then the mirrored position was introduced
 # followed by talking with Eric Stratigakis (https://abstractigakis.io)
 # We spoke about my initial pseudo code, and how the approach is best coded
+# the theory is you can stack rooms in directions, and the relative positions can be used to calculate the validity of the shot
 
 
-from math import sqrt
+from math import hypot
 from numpy import zeros
 
 
-def computeDist(p1, p2):
-    return sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
-
+def calcHypotenuse(p1, p2):
+    return hypot((p1[0] - p2[0]), (p1[1] -  p2[1]))
+    
 
 def computeGCD(x, y):
     while(y):
@@ -18,86 +19,108 @@ def computeGCD(x, y):
     return abs(x)
 
 
-def get_entity_position_from_room_number(entity, room_number, dimensions):
-    r_x, r_y = room_number
-    e_x, e_y = entity
-    dim_x, dim_y = dimensions
+def get_position_by_multiplier(initial_position, multipliers, dimensions):
+    multipliers_x = multipliers[0]
+    multipliers_y = multipliers[1]
 
-    res_x = dim_x*r_x + e_x if r_x % 2 == 0 else dim_x*r_x + (dim_x - e_x)
-    res_y = dim_y*r_y + e_y if r_y % 2 == 0 else dim_y*r_y + (dim_y - e_y)
+    dimension_x = dimensions[0]
+    dimension_y = dimensions[1]
 
-    return (res_x, res_y)
+    position_x = initial_position[0]
+    position_y = initial_position[1]
+
+    # Calculate the relative position based on multiples, or direct difference
+    final_x = dimension_x*multipliers_x + position_x if multipliers_x % 2 == 0 else dimension_x*multipliers_x + (dimension_x - position_x)
+    final_y = dimension_y*multipliers_y + position_y if multipliers_y % 2 == 0 else dimension_y*multipliers_y + (dimension_y - position_y)
+
+    return (final_x, final_y)
 
 
 def solution(dimensions, your_position, trainer_position, distance):
+    # Get Room Dimensions
+    room_width = dimensions[0]
+    room_height = dimensions[1]
+
+    # Get my position
+    my_posX = your_position[0]
+    my_posY = your_position[1]
+
+    # Identify the coverage distance of my beam based on travel
+
+    north_distance_multiples = (distance + my_posY)//room_height + 1
+    south_distance_multiples = (distance - my_posY)//room_height + 1
+    west_distance_multiples = (distance - my_posX)//room_width + 1
+    east_distance_multiples = (distance + my_posX)//room_width + 1
 
 
+    max_width = (east_distance_multiples + west_distance_multiples)*room_width + 1
+    max_height = (north_distance_multiples + south_distance_multiples)*room_height + 1
 
-    dim_x, dim_y = dimensions
-    m_x, m_y = your_position
+    width_offset = west_distance_multiples*room_width
+    height_offset = south_distance_multiples*room_height
 
-    num_rooms_above_x_axis = (distance + m_y)//dim_y + 1
-    num_rooms_below_x_axis = (distance - m_y)//dim_y + 1
-    num_rooms_left_of_y_axis = (distance - m_x)//dim_x + 1
-    num_rooms_right_of_y_axis = (distance + m_x)//dim_x + 1
+    grid = zeros(shape=(max_width, max_height))
 
-    w = (num_rooms_right_of_y_axis + num_rooms_left_of_y_axis)*dim_x + 1
-    h = (num_rooms_above_x_axis + num_rooms_below_x_axis)*dim_y + 1
-
-    x_offset = num_rooms_left_of_y_axis*dim_x
-    y_offset = num_rooms_below_x_axis*dim_y
-
-    matrix = zeros(shape=(w, h))
-    for i in range(-1*num_rooms_left_of_y_axis, num_rooms_right_of_y_axis):
-        for j in range(-1*num_rooms_below_x_axis, num_rooms_above_x_axis):
-            tv_x, tv_y = get_entity_position_from_room_number(
+    # Populate the grid with relative possible positions for me and the trainer
+    for i in range(-1*west_distance_multiples, east_distance_multiples):
+        for j in range(-1*south_distance_multiples, north_distance_multiples):
+            trainer_pos_result = get_position_by_multiplier(
                 trainer_position, [i, j], dimensions)
 
-            mv_x, mv_y = get_entity_position_from_room_number(
+            trainer_posX_multiplied = trainer_pos_result[0]
+            trainer_posY_multiplied = trainer_pos_result[1]
+
+            my_pos_result = get_position_by_multiplier(
                 your_position, [i, j], dimensions)
 
-            matrix[tv_x+x_offset][tv_y+y_offset] = 1
-            matrix[mv_x+x_offset][mv_y+y_offset] = 2
+            my_posX_multiplied = my_pos_result[0]
+            my_posY_multiplied = my_pos_result[1]
 
-    hits = 0
-    shots_taken = set()
-    for i in range(-1*num_rooms_left_of_y_axis, num_rooms_right_of_y_axis):
-        for j in range(-1*num_rooms_below_x_axis, num_rooms_above_x_axis):
-            t_x, t_y = get_entity_position_from_room_number(
+            grid[trainer_posX_multiplied+width_offset][trainer_posY_multiplied+height_offset] = 1
+            grid[my_posX_multiplied+width_offset][my_posY_multiplied+height_offset] = 2
+
+
+    attempted_shots = set()
+    successes = 0
+
+    # Attempt to cycle through multiples and see if the shots are succecssful
+    for i in range(-1*west_distance_multiples, east_distance_multiples):
+        for j in range(-1*south_distance_multiples, north_distance_multiples):
+            attempted_trainer_posX, attempted_trainer_posY = get_position_by_multiplier(
                 trainer_position, [i, j], dimensions)
-            if distance < computeDist([t_x, t_y], your_position):
+            if distance < calcHypotenuse([attempted_trainer_posX, attempted_trainer_posY], your_position):
                 continue
-            delta_y = t_y - m_y
-            delta_x = t_x - m_x
-            d = computeGCD(delta_y, delta_x)
-            delta_y = int(delta_y/d)
-            delta_x = int(delta_x/d)
-            if (delta_y, delta_x) in shots_taken:
+            diffY = attempted_trainer_posY - my_posY
+            diffX = attempted_trainer_posX - my_posX
+            d = computeGCD(diffY, diffX)
+            diffY = int(diffY/d)
+            diffX = int(diffX/d)
+            if (diffY, diffX) in attempted_shots:
                 continue
-            shots_taken.add((delta_y, delta_x))
-            ray_x, ray_y = m_x + x_offset, m_y + y_offset
+            attempted_shots.add((diffY, diffX))
+            ray_x, ray_y = my_posX + width_offset, my_posY + height_offset
             while True:
-                ray_x += delta_x
-                ray_y += delta_y
-                entity = matrix[ray_x][ray_y]
+                ray_x += diffX
+                ray_y += diffY
+                entity = grid[ray_x][ray_y]
                 if entity == 1:
-                    hits += 1
+                    successes += 1
                     break
                 elif entity == 2:
                     break
-    return hits
+    return successes
 
 
 # Tests to try:
-#     assert solution([3, 2], [1, 1], [2, 1], 4) == 7
-#     assert solution([2, 5], [1, 2], [1, 4], 11) == 27
-#     assert solution([23, 10], [6, 4], [3, 2], 23) == 8
-#     assert solution([1250, 1250], [1000, 1000], [500, 400], 10000) == 196
-#     assert solution([10, 10], [4, 4], [3, 3], 5000) == 739323
+assert solution([3, 2], [1, 1], [2, 1], 4) == 7
+assert solution([2, 5], [1, 2], [1, 4], 11) == 27
+assert solution([23, 10], [6, 4], [3, 2], 23) == 8
+assert solution([1250, 1250], [1000, 1000], [500, 400], 10000) == 196
+assert solution([10, 10], [4, 4], [3, 3], 5000) == 739323
+assert solution([2, 3], [1, 1], [1, 2], 4) == 7
+assert solution([3, 4], [1, 2], [2, 1], 7) == 10
+assert solution([4, 4], [2, 2], [3, 1], 6) == 7
+assert solution([300, 275], [150, 150], [180, 100], 500) == 9
+# assert solution([3, 4], [1, 1], [2, 2], 500) == 54243
 assert solution([3, 2], [1, 1], [2, 1], 7) == 19
-print(solution([3, 2], [1, 1], [2, 1], 7))
-#     assert solution([2, 3], [1, 1], [1, 2], 4) == 7
-#     assert solution([3, 4], [1, 2], [2, 1], 7) == 10
-#     assert solution([4, 4], [2, 2], [3, 1], 6) == 7
-#     assert solution([300, 275], [150, 150], [180, 100], 500) == 9
-#     assert solution([3, 4], [1, 1], [2, 2], 500) == 54243
+print('that is it')
