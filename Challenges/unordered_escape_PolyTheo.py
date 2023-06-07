@@ -125,3 +125,8 @@ def solution(w, h, s):
             m=cpw[1]*cph[1]
             grid+=m*(s**sum([sum([gcd(i, j, gcdTable) for i in cpw[0]]) for j in cph[0]]))
     return str(grid//(factorial(w,factorialTable)*factorial(h,factorialTable)))
+
+
+
+print(solution(2,2,2))
+print(solution(2,3,4))
