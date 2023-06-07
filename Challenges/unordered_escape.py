@@ -2,10 +2,8 @@
 #     To my understanding, it's the following:
 #         Given a 2 dimensional matrix of size w x h
 #         That can have X number of states in each cell
-    
 #         How many starting original states can there be?
 #             original = state that was not achieved by row/col swap manipulation of some other state
-        
 #     Given this, the logic should be that there would be some factorials involved since the nature of the solution is various states
 #     After doing some research, it seems that matrixes manipulated this way can be simplified using Polya's Enumeration theorem
 #     This theorem provides a way to graph and calculate arrangements, and can be used to discover the number of arrangements
