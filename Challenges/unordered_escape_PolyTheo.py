@@ -71,14 +71,13 @@ def partitionsAndCycleCount(n, factorialTable):
         n!/(1^{i_1}i_1!2^{i_2}i_2!...n^{i_n}i_n!)
     This algorithm comes from https://arxiv.org/abs/0909.2331
     """
-    k = 0  # Index of last element in a partition 
     p = n*[0] # To store a partition in p[0:k+1]
     p[0] = n  # First partition is [n]
     result = [] # To store all partitions
     # The loop stops when the current partition has all 1s 
     a = [0 for i in range(n + 1)]
-    k = 1
     y = n - 1
+    k = 1
     result = []
     while k != 0:
         x = a[k - 1] + 1
@@ -128,5 +127,5 @@ def solution(w, h, s):
 
 
 
-print(solution(2,2,2))
-print(solution(2,3,4))
+print('answer ', solution(2,2,2))
+print('answer ', solution(2,3,4))
